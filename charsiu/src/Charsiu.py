@@ -5,12 +5,12 @@
 import sys
 import torch
 from itertools import groupby
-sys.path.append('src/')
+#sys.path.append('src/')
 import numpy as np
 #sys.path.insert(0,'src')
-from models import Wav2Vec2ForAttentionAlignment, Wav2Vec2ForFrameClassification, Wav2Vec2ForCTC
-from utils import seq2duration,forced_align,duration2textgrid,word2textgrid
-from processors import CharsiuPreprocessor_zh, CharsiuPreprocessor_en
+from charsiu.src.models import Wav2Vec2ForAttentionAlignment, Wav2Vec2ForFrameClassification, Wav2Vec2ForCTC
+from charsiu.src.utils import seq2duration,forced_align,duration2textgrid,word2textgrid
+from charsiu.src.processors import CharsiuPreprocessor_zh, CharsiuPreprocessor_en
 
 processors = {'zh':CharsiuPreprocessor_zh,
               'en':CharsiuPreprocessor_en}

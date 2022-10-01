@@ -42,10 +42,33 @@ class UIWindow:
             raise ValueError('window system is none of the correct types')
         
     def createX11MenuBar(self):
-        pass
+        
+        self.parent.option_add('*tearOff', FALSE)
+        # creating menubar
+        self.menubar = Menu(self.window)
+
+        self.setupCommonMenuItems()
+        # adding help menu
+        self.helpmenu = Menu(self.menubar, name='help')
+        self.menubar.add_cascade(menu=self.helpmenu, label='Help')
+       
+        # attach menubar to window
+        self.window['menu'] = self.menubar
 
     def createWindowsMenuBar(self):
-        pass
+        
+        self.parent.option_add('*tearOff', FALSE)
+        # creating menubar
+        self.menubar = Menu(self.window)
+
+        # adding application menu
+        sysmenu = Menu(self.menubar, name='system')
+        self.menubar.add_cascade(menu=sysmenu)
+
+        self.setupCommonMenuItems()
+
+        # attach menubar to window
+        self.window['menu'] = self.menubar
 
     def createMacOSMenuBar(self):
 
@@ -59,6 +82,24 @@ class UIWindow:
         appmenu.add_command(label='About My Application')
         appmenu.add_separator()
 
+        self.setupCommonMenuItems()
+
+        # adding window menu
+        self.windowmenu = Menu(self.menubar, name='window')
+        self.menubar.add_cascade(menu=self.windowmenu, label='Window')
+
+        # adding help menu
+        self.helpmenu = Menu(self.menubar, name='help')
+        self.menubar.add_cascade(menu=self.helpmenu, label='Help')
+        self.parent.createcommand('tk::mac::ShowHelp', self.showHelp)
+        self.parent.createcommand(
+            'tk::mac::ShowPreferences', self.showMyPreferencesDialog)
+
+        # attach menubar to window
+        self.window['menu'] = self.menubar
+
+    def setupCommonMenuItems(self):
+        
         # file menu
         self.menu_file = Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
@@ -140,25 +181,27 @@ class UIWindow:
         self.menu_analyse.add_command(
             label="Get At Cursor Analysis", command=self.getCursorAnalysis)
 
-        # adding window menu
-        self.windowmenu = Menu(self.menubar, name='window')
-        self.menubar.add_cascade(menu=self.windowmenu, label='Window')
-
-        # adding help menu
-        self.helpmenu = Menu(self.menubar, name='help')
-        self.menubar.add_cascade(menu=self.helpmenu, label='Help')
-        self.parent.createcommand('tk::mac::ShowHelp', self.showHelp)
-        self.parent.createcommand(
-            'tk::mac::ShowPreferences', self.showMyPreferencesDialog)
-
-        # attach menubar to window
-        self.window['menu'] = self.menubar
+    def dismiss(self):
+        self.preferenceWindow.grab_release()
+        self.preferenceWindow.destroy()
 
     def showMyPreferencesDialog(self):
-        pass
+        self.preferenceWindow = Toplevel(self.window)
+        self.preferenceWindow.title("Preferences")
+        label = ttk.Label(self.preferenceWindow, text="This is the preference window. At this time there is no preferences to edit")
+        label.grid(column=0, row=0, sticky=(N, W, E, S))
+        self.preferenceWindow.protocol("WM_DELETE_WINDOW", self.dismiss)
+        self.preferenceWindow.transient(self.window) 
+        self.preferenceWindow.wait_visibility() 
+        self.preferenceWindow.grab_set() 
+        self.preferenceWindow.wait_window()
 
     def showHelp(self):
-        pass
+        helpWindow = Toplevel(self.parent)
+        helpWindow.tk.call("::tk::unsupported::MacWindowStyle", "style", helpWindow._w, "utility")
+        helpWindow.title("Help")
+        label = ttk.Label(helpWindow, text="This is the help window. For full documentation on this app refer to README.md at https://github.com/hayleej/Speech-Analysis-App")
+        label.grid(column=0, row=0, sticky=(N, W, E, S))
 
     #! below are temporary definitions for all the menu commands
     def newFile(self):
