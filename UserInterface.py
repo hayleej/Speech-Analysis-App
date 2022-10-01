@@ -17,7 +17,7 @@ class UIWindow:
 
     def __init__(self, parent):
         self.window = Toplevel(parent)
-        self.parent = parent  # TODO don't know if i need this
+        self.parent = parent
         self.window.columnconfigure(0, weight=1)
         self.window.rowconfigure(0, weight=1)
         self.mainframe = ttk.Frame(self.window, padding="2m")
