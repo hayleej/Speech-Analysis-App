@@ -1,4 +1,5 @@
 
+from pickle import FALSE
 import fileIO
 import numpy as np
 import matplotlib as mpl
@@ -124,11 +125,20 @@ class Display:
 
     def showTranscript(self):
         yscale = 0.5/self.phoneTable[0, 0].get_height()
+        print(self.phoneTable[0, 0].get_height())
+        print(yscale)
         self.phoneTable.scale(1, yscale)
+        self.transcriptTable.set_visible(True)
+        #self.transcriptTable.scale(1, yscale)
+        self.fig.canvas.draw_idle()
 
     def hideTranscript(self):
         yscale = 1/self.phoneTable[0, 0].get_height()
+        print(self.phoneTable[0, 0].get_height())
+        print(yscale)
         self.phoneTable.scale(1, yscale)
+        self.transcriptTable.set_visible(False)
+        self.fig.canvas.draw_idle()
 
     # * display graph1 - signal graph
     def signalGraph(self, time):
@@ -162,18 +172,30 @@ class Display:
         self.phoneTable = mpl.table.table(self.axs[2], cellText=pCellText, cellLoc='center',
                                      colWidths=widths, loc='upper left')
         self.phoneTable.AXESPAD = 0
-        self.phoneTable.auto_set_font_size(True)
-        #self.phoneTable.set_fontsize(10)
+        self.phoneTable.auto_set_font_size(False)
+        self.phoneTable.set_fontsize("medium")
 
+        #NOTE saving table height for later
+        self.height = self.phoneTable[0, 0].get_height()
         # changing table scale to fill axis
-        yscale = 1/self.phoneTable[0, 0].get_height()
-        self.phoneTable.scale(1, yscale)
+        #yscale = 0.5/self.phoneTable[0, 0].get_height()
+        #self.phoneTable.scale(1, yscale)
 
         self.axs[2].set_xticks(np.arange(0, self.endTime, 0.2))
         self.axs[2].set_xlabel('Time (seconds)')
         self.axs[2].set_yticks([])
         self.axs[2].get_yaxis().set_visible(False)
         self.axs[2].set_xbound(lower=0, upper=self.endTime)
+
+    def createTranscriptTable(self):
+        self.transcriptTable = mpl.table.table(self.axs[2], cellText=[[self.transcript]], cellLoc='center',colWidths=[1], loc='lower left')
+        self.transcriptTable.AXESPAD = 0
+        self.transcriptTable.auto_set_font_size(True)
+        #self.transcriptTable[0, 0].set_text_props(fontsize='xx-large')
+        self.transcriptTable.scale(1,  0.5/self.phoneTable[0, 0].get_height())
+        self.showTranscript()
+        
+        
 
     # * The matplotlib display part
     def graphDisplay(self):
@@ -185,6 +207,8 @@ class Display:
         self.spectrogram()
 
         self.phonemeTable()
+
+        self.createTranscriptTable()
 
         self.createSegLines()
 
