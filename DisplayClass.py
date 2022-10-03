@@ -175,12 +175,6 @@ class Display:
         self.phoneTable.auto_set_font_size(False)
         self.phoneTable.set_fontsize("medium")
 
-        #NOTE saving table height for later
-        self.height = self.phoneTable[0, 0].get_height()
-        # changing table scale to fill axis
-        #yscale = 0.5/self.phoneTable[0, 0].get_height()
-        #self.phoneTable.scale(1, yscale)
-
         self.axs[2].set_xticks(np.arange(0, self.endTime, 0.2))
         self.axs[2].set_xlabel('Time (seconds)')
         self.axs[2].set_yticks([])
