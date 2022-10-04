@@ -1,11 +1,13 @@
 
-from pickle import FALSE
 import fileIO
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import soundfile as sf
 import implementCharsiu as ic
+from blume.table import table
+import textwrap as tw
+from matplotlib.table import table as ta
 
 
 class Display:
@@ -35,17 +37,17 @@ class Display:
 
             # using Charsui to get forced alignment
             self.alignment = ic.implementTextless(audioFile)
-            self.phonemeList, self.timeList = ic.alignmentIntoLists(self.alignment)
+            self.phonemeList, self.timeList = ic.alignmentIntoLists(
+                self.alignment)
             self.transcript = fileIO.readTranscript(path_to_transcript)
             self.correctP = ic.implementCharsiu(audioFile, path_to_transcript)
-        
+
         else:
             for ax in self.axs:
                 ax.get_xaxis().set_visible(False)
                 ax.get_yaxis().set_visible(False)
                 ax.set_xticks([])
                 ax.set_xlabel('')
-
 
     def getAmplitude(self, time):
         # -1 due to indexing starting at 0
@@ -64,7 +66,6 @@ class Display:
         col = self.getClosestIndex(time, self.specTime)
         row = self.getClosestIndex(freq, self.specFreqs)
         return self.spec[row][col]
-
 
     def getClosestIndex(self, value, array):
         # lowerI is the lower index and upperI is the upper index of the two values the value is between
@@ -158,6 +159,22 @@ class Display:
 
         self.axs[1].set_xbound(lower=0, upper=self.endTime)
 
+    def createSpacesForWrapping(self):
+        pCellText = [[]]
+        i = 0
+        widths = self._getColWidths()
+        for phone in self.phonemeList:
+            if widths[i] < 0.017:
+                pCellText[0].append(tw.fill(phone, width=1))
+            elif widths[i] < 0.034:
+                pCellText[0].append(tw.fill(phone, width=2))
+            elif widths[i] < 0.051:
+                pCellText[0].append(tw.fill(phone, width=3))
+            else:
+                pCellText[0].append(tw.fill(phone, width=5))
+            i = i + 1
+        return pCellText
+
     # * display graph3 - phoneme tables
     def phonemeTable(self):
         # phoneme table
@@ -165,15 +182,21 @@ class Display:
 
         widths = self._getColWidths()
 
-        pCellText = []
-        pCellText.insert(0, self.phonemeList)
+        pCellText = self.createSpacesForWrapping()
 
         # Phoneme Table
-        self.phoneTable = mpl.table.table(self.axs[2], cellText=pCellText, cellLoc='center',
-                                     colWidths=widths, loc='upper left')
+        self.phoneTable = table(self.axs[2], cellText=pCellText, cellLoc='center',
+                                colWidths=widths, loc='upper left')
         self.phoneTable.AXESPAD = 0
         self.phoneTable.auto_set_font_size(False)
         self.phoneTable.set_fontsize("medium")
+
+        cells = [key for key in self.phoneTable._cells]
+        print(cells)
+        for cell in cells:
+            if self.phoneTable._cells[cell]._width < 0.017:
+                self.phoneTable._cells[cell].set_text_props(
+                    wrap=True, fontsize='small')
 
         self.axs[2].set_xticks(np.arange(0, self.endTime, 0.2))
         self.axs[2].set_xlabel('Time (seconds)')
@@ -182,16 +205,16 @@ class Display:
         self.axs[2].set_xbound(lower=0, upper=self.endTime)
 
     def createTranscriptTable(self):
-        self.transcriptTable = mpl.table.table(self.axs[2], cellText=[[self.transcript]], cellLoc='center',colWidths=[1], loc='lower left')
+        self.transcriptTable = table(self.axs[2], cellText=[
+                                     [self.transcript]], cellLoc='center', colWidths=[1], loc='lower left')
         self.transcriptTable.AXESPAD = 0
-        self.transcriptTable.auto_set_font_size(True)
-        #self.transcriptTable[0, 0].set_text_props(fontsize='xx-large')
-        self.transcriptTable.scale(1,  0.5/self.phoneTable[0, 0].get_height())
+        self.transcriptTable.auto_set_font_size(False)
+        self.transcriptTable[0, 0].set_text_props(fontsize='xx-large')
+        self.transcriptTable.scale(1, 0.5/self.phoneTable[0, 0].get_height())
         self.showTranscript()
-        
-        
 
     # * The matplotlib display part
+
     def graphDisplay(self):
 
         time = np.arange(self.endTime, step=1/self.samplerate)
@@ -208,7 +231,7 @@ class Display:
 
 
 if __name__ == "__main__":
-    testDisplay = Display('testData/SA1.wav','testData/SA1.txt')
+    testDisplay = Display('testData/SA1.wav', 'testData/SA1.txt')
     testDisplay.graphDisplay()
     plt.show()
     plt.close('all')
