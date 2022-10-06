@@ -1,0 +1,12 @@
+matplotlib
+numpy
+pandas
+soundfile
+blume
+torch
+transformers
+praatio
+librosa
+nltk
+g2p_en
+g2pM

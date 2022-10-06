@@ -7,7 +7,6 @@ import soundfile as sf
 import implementCharsiu as ic
 from blume.table import table
 import textwrap as tw
-from matplotlib.table import table as ta
 
 
 class Display:
@@ -209,7 +208,7 @@ class Display:
                                      [self.transcript]], cellLoc='center', colWidths=[1], loc='lower left')
         self.transcriptTable.AXESPAD = 0
         self.transcriptTable.auto_set_font_size(False)
-        self.transcriptTable[0, 0].set_text_props(fontsize='xx-large')
+        self.transcriptTable[0, 0].set_text_props(fontsize='x-large')
         self.transcriptTable.scale(1, 0.5/self.phoneTable[0, 0].get_height())
         self.showTranscript()
 
