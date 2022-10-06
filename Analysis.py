@@ -6,10 +6,14 @@ from DisplayClass import Display
 import implementCharsiu as ic
 
 # ARPABET has 31 C and 19 V
-CONSONANTS = {"NG","F","M","R","N","V", "HH","Z","K","CH", "W","ZH","T","Y","B","P", "TH", "DH","G","L","JH","SH","D","S"}
-VOWELS ={"AE","UW","IY","AW","UH","OW","AA", "ER","EY","EH","AH","AO","OY","AY","IH"}
-OTHER = {"[SIL]","[UNK]", "[PAD]"}
-NOTINCLUDED = {"C":{"DX","EL","EM","EN","NX","Q","WH"},"V":{"AX","AXR","IX","UX"},"O":{}}
+CONSONANTS = {"NG", "F", "M", "R", "N", "V", "HH", "Z", "K", "CH", "W",
+              "ZH", "T", "Y", "B", "P", "TH", "DH", "G", "L", "JH", "SH", "D", "S"}
+VOWELS = {"AE", "UW", "IY", "AW", "UH", "OW", "AA",
+          "ER", "EY", "EH", "AH", "AO", "OY", "AY", "IH"}
+OTHER = {"[SIL]", "[UNK]", "[PAD]"}
+NOTINCLUDED = {"C": {"DX", "EL", "EM", "EN", "NX", "Q", "WH"},
+               "V": {"AX", "AXR", "IX", "UX"}, "O": {}}
+
 
 class Analysis():
 
@@ -20,14 +24,12 @@ class Analysis():
         self.phones = self.dis.alignment
         self.alignment = self.alignUsingMidPoint()
         # gets phonemes and times as pandas data frame
-        
-        #if self.dis.transcript != '':
+
+        # if self.dis.transcript != '':
         #    self.phoneDF = ic.getPhonesDataFrame(dis.alignment[0])
-        #else:
+        # else:
         self.phoneDF = ic.getPhonesDataFrame(dis.alignment)
         self.correctDF = ic.getPhonesDataFrame(self.correctPhones)
-        
-
 
     def _getMidPointList(self):
         # get list in format [[correctP, [midpointmatches]],...]
@@ -38,9 +40,10 @@ class Analysis():
             midPointMatches = []
             for actual in self.phones:
                 mid = (actual[1] + actual[0]) / 2
-                if mid >= target[0] and mid < target[1]: #! look at whether it should be <=, >= or <, >
+                # ! look at whether it should be <=, >= or <, >
+                if mid >= target[0] and mid < target[1]:
                     midPointMatches.append(actual[2])
-            midPointList.append([target[2],midPointMatches])
+            midPointList.append([target[2], midPointMatches])
         return midPointList
 
     def alignUsingMidPoint(self):
@@ -57,25 +60,25 @@ class Analysis():
                 # if correctP in midpointmatches then match that one and have others empty matches
                 for m in matches[1]:
                     if m == matches[0]:
-                        alignment.append([matches[0],m])
+                        alignment.append([matches[0], m])
                     else:
                         alignment.append(["  ", m])
             else:
                 # if not in midpointmatches then match to first in list
                 for m in matches[1]:
                     if m == matches[1][0]:
-                        alignment.append([matches[0],m])
+                        alignment.append([matches[0], m])
                     else:
                         alignment.append(["  ", m])
         return alignment
 
     def calcPercentCorrectWrapper(self):
-        cc, cv, other = self._calcPercentCorrect(0,0,0,0)
+        cc, cv, other = self._calcPercentCorrect(0, 0, 0, 0)
         consonantNum, vowelNum, otherNum = self._calcTotalInCorrect()
         PCC = (cc/consonantNum)*100
         PVC = (cv/vowelNum)*100
         PPC = ((cc+cv+other)/(consonantNum+vowelNum+otherNum))*100
-        return PCC,PVC,PPC
+        return PCC, PVC, PPC
 
     def _calcTotalInCorrect(self):
         consonantNum = 0
@@ -84,36 +87,35 @@ class Analysis():
 
         for phone in self.correctPhones:
             if phone[2] in CONSONANTS:
-                consonantNum +=1
+                consonantNum += 1
             elif phone[2] in VOWELS:
-                vowelNum +=1
+                vowelNum += 1
             elif phone[2] in OTHER and phone[2] != "  ":
-                otherNum +=1
-        
+                otherNum += 1
+
         return consonantNum, vowelNum, otherNum
 
-    def _calcPercentCorrect(self,cur,cc,cv,other):
+    def _calcPercentCorrect(self, cur, cc, cv, other):
         if cur < len(self.alignment):
             if self.alignment[cur][1] in CONSONANTS:
                 if self.alignment[cur][0] == self.alignment[cur][1]:
-                    cc+=1
+                    cc += 1
             elif self.alignment[cur][1] in VOWELS:
                 if self.alignment[cur][0] == self.alignment[cur][1]:
-                    cv+=1
+                    cv += 1
             elif self.alignment[cur][1] in OTHER and self.alignment[cur][1] != "  ":
                 if self.alignment[cur][0] == self.alignment[cur][1]:
-                    other+=1
-            cc, cv, other= self._calcPercentCorrect(cur+1, cc, cv, other)
+                    other += 1
+            cc, cv, other = self._calcPercentCorrect(cur+1, cc, cv, other)
         return cc, cv, other
 
-
-    def getNumOfWords(self,transcript):
+    def getNumOfWords(self, transcript):
         words = transcript.split(' ')
         return len(words)
 
     def _calcPMLU(self):
-        cc = self._calcPercentCorrect(0,0,0,0)
-        if len(self.phones)<len(self.correctPhones):
+        cc = self._calcPercentCorrect(0, 0, 0, 0)
+        if len(self.phones) < len(self.correctPhones):
             points = len(self.phones)
         else:
             points = len(self.correctPhones)
@@ -123,7 +125,7 @@ class Analysis():
         points = len(self.correctPhones)
         for r in self.correctPhones:
             if r[2] in CONSONANTS:
-                points+=1
+                points += 1
         return points/self.wordNum
 
     def _calcPWP(self):
@@ -174,7 +176,6 @@ class Analysis():
         phonemeSummary = 'Phonemes:\n' + self.correctDF.to_string() + '\n\n'
         return str(phonemeSummary)
 
-
     def getSummaryText(self):
         summaryString = self._getTranscriptString()+'General:\n'+self._getTimeSummaryString() + \
             self._getAmpSummaryString() + self._getFreqSummaryString() + \
@@ -194,9 +195,9 @@ class Analysis():
         PCC, PVC, PPC = self.calcPercentCorrectWrapper()
         PMLU, PWP = self.calcPMLUandPWP()
 
-        analysisString = self._getTranscriptString() + 'Phoneme List:\t\t' + \
-            list1 + '\nCorrect Phonemes:\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + "{:.2f}".format(PCC) + '\n\tPVC = ' + "{:.2f}".format(PVC) + '\n\tPPC = ' + "{:.2f}".format(PPC) + '\n\tPMLU = ' + "{:.2f}".format(PMLU) + '\n\tPWP = ' + "{:.2f}".format(PWP) + '\n\n'
-
+        analysisString = self._getTranscriptString() + 'Correct Phonemes:\t\t' + \
+            list1 + '\nPhoneme List\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + "{:.2f}".format(PCC) + '\n\tPVC = ' + "{:.2f}".format(
+                PVC) + '\n\tPPC = ' + "{:.2f}".format(PPC) + '\n\tPMLU = ' + "{:.2f}".format(PMLU) + '\n\tPWP = ' + "{:.2f}".format(PWP) + '\n\n'
 
         return str(analysisString)
 
@@ -213,7 +214,9 @@ class Analysis():
         PCC, PVC, PPC = self.calcPercentCorrectWrapper()
         PMLU, PWP = self.calcPMLUandPWP()
         analysisString = self._getTranscriptString() + 'Phoneme List:\t\t' + \
-            list1 + '\nCorrect Phonemes:\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + PCC + '\n\tPVC = ' + PVC + '\n\tPPC = ' + PPC + '\n\tPMLU = ' + PMLU + '\n\tPWP = ' + PWP + '\n\n'
+            list1 + '\nCorrect Phonemes:\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + \
+            PCC + '\n\tPVC = ' + PVC + '\n\tPPC = ' + PPC + \
+            '\n\tPMLU = ' + PMLU + '\n\tPWP = ' + PWP + '\n\n'
 
         return str(analysisString)
 
@@ -330,7 +333,7 @@ class Analysis():
 
 
 if __name__ == "__main__":
-    testDis = Display('testData/SA1.wav','testData/SA1.txt')
+    testDis = Display('testData/SA1.wav', 'testData/SA1.txt')
     testDis.graphDisplay()
     testAnalysis = Analysis(testDis)
     print(testAnalysis.getSummaryText())
