@@ -23,7 +23,7 @@ class UIWindow:
         self.mainframe = ttk.Frame(self.window, padding="2m")
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
 
-        #self.createMenuBar()
+        # self.createMenuBar()
 
         self.savedFilePath = None
 
@@ -40,9 +40,9 @@ class UIWindow:
             self.createMacOSMenuBar()
         else:
             raise ValueError('window system is none of the correct types')
-        
+
     def createX11MenuBar(self):
-        
+
         self.parent.option_add('*tearOff', FALSE)
         # creating menubar
         self.menubar = Menu(self.window)
@@ -51,12 +51,12 @@ class UIWindow:
         # adding help menu
         self.helpmenu = Menu(self.menubar, name='help')
         self.menubar.add_cascade(menu=self.helpmenu, label='Help')
-       
+
         # attach menubar to window
         self.window['menu'] = self.menubar
 
     def createWindowsMenuBar(self):
-        
+
         self.parent.option_add('*tearOff', FALSE)
         # creating menubar
         self.menubar = Menu(self.window)
@@ -99,7 +99,7 @@ class UIWindow:
         self.window['menu'] = self.menubar
 
     def setupCommonMenuItems(self):
-        
+
         # file menu
         self.menu_file = Menu(self.menubar)
         self.menubar.add_cascade(menu=self.menu_file, label='File')
@@ -118,7 +118,7 @@ class UIWindow:
             menu_recent.add_command(label=os.path.basename(
                 f), command=lambda f=f: self.openFile(f))
         '''
-        #? could have the list of recent files saved in a folder (local or something?) that gets loaded up everytime the app is run
+        # ? could have the list of recent files saved in a folder (local or something?) that gets loaded up everytime the app is run
         self.menu_file.add_separator()
 
         self.menu_file.add_command(label='Save', command=self.save)
@@ -188,19 +188,22 @@ class UIWindow:
     def showMyPreferencesDialog(self):
         self.preferenceWindow = Toplevel(self.window)
         self.preferenceWindow.title("Preferences")
-        label = ttk.Label(self.preferenceWindow, text="This is the preference window. At this time there is no preferences to edit")
+        label = ttk.Label(
+            self.preferenceWindow, text="This is the preference window. At this time there is no preferences to edit")
         label.grid(column=0, row=0, sticky=(N, W, E, S))
         self.preferenceWindow.protocol("WM_DELETE_WINDOW", self.dismiss)
-        self.preferenceWindow.transient(self.window) 
-        self.preferenceWindow.wait_visibility() 
-        self.preferenceWindow.grab_set() 
+        self.preferenceWindow.transient(self.window)
+        self.preferenceWindow.wait_visibility()
+        self.preferenceWindow.grab_set()
         self.preferenceWindow.wait_window()
 
     def showHelp(self):
         helpWindow = Toplevel(self.parent)
-        helpWindow.tk.call("::tk::unsupported::MacWindowStyle", "style", helpWindow._w, "utility")
+        helpWindow.tk.call("::tk::unsupported::MacWindowStyle",
+                           "style", helpWindow._w, "utility")
         helpWindow.title("Help")
-        label = ttk.Label(helpWindow, text="This is the help window. For full documentation on this app refer to README.md at https://github.com/hayleej/Speech-Analysis-App")
+        label = ttk.Label(
+            helpWindow, text="This is the help window. For full documentation on this app refer to README.md at https://github.com/hayleej/Speech-Analysis-App")
         label.grid(column=0, row=0, sticky=(N, W, E, S))
 
     #! below are temporary definitions for all the menu commands
@@ -221,11 +224,10 @@ class UIWindow:
     def saveAs(self):
         # implemented in child classes
         pass
-        
 
     def closeFile(self):
-        #? need to do binding to exit button
-        #? if only window that exists is closed then close app
+        # ? need to do binding to exit button
+        # ? if only window that exists is closed then close app
         pass
 
     def zoom(self):
@@ -415,7 +417,8 @@ class DisplayWindow(UIWindow):
         if self.analysisW != None:
             self.analysisW.window.lift()
         else:
-            self.analysisW = AnalysisWindow(self.parent,self, self.dis, self.fileName)
+            self.analysisW = AnalysisWindow(
+                self.parent, self, self.dis, self.fileName)
 
     def editorInfo(self):
         self.openAnalysisWindow()
@@ -440,11 +443,11 @@ class DisplayWindow(UIWindow):
     def saveAs(self):
         super().saveAs()
         path_to_file = filedialog.asksaveasfilename(confirmoverwrite=True, filetypes=(
-            ("Analysis file", "*.DAT")), title="Save File")
+            ("Analysis file", "*.DAT"), ("All file types", "*.*")), title="Save File")
         if path_to_file.split('.')[-1] == 'DAT':
             saveAndLoad.saveProgram(path_to_file, self.dis)
         self.savedFilePath = path_to_file
-    
+
     def save(self):
         super().save()
         if self.savedFilePath != None:
@@ -499,24 +502,26 @@ class AnalysisWindow(UIWindow):
 
     def createMacOSMenuBar(self):
         super().createMacOSMenuBar()
-    
+
     def saveAs(self):
         super().saveAs()
         path_to_file = filedialog.asksaveasfilename(confirmoverwrite=True, filetypes=(
             ("Text file", "*.txt"), ("JSON (Phoneme Segmentation)", "*.json"), ("Markdown", "*.md")), title="Save File")
         if path_to_file.split('.')[-1] == 'txt' or path_to_file.split('.')[-1] == 'md':
-            saveAndLoad.saveAnalysis(path_to_file, self.textBox.get('1.0','end'))
+            saveAndLoad.saveAnalysis(
+                path_to_file, self.textBox.get('1.0', 'end'))
             self.savedFilePath = path_to_file
         elif path_to_file.split('.')[-1] == 'json':
             saveAndLoad.saveAnalysis(path_to_file, self.analysis.phones)
-    
+
     def save(self):
         super().save()
         if self.savedFilePath != None and self.savedFilePath.split('.')[-1] != 'json':
-            saveAndLoad.saveAnalysis(self.savedFilePath, self.textBox.get('1.0','end'))
+            saveAndLoad.saveAnalysis(
+                self.savedFilePath, self.textBox.get('1.0', 'end'))
         else:
             self.saveAs()
-    
+
     def closeWindow(self):
         self.displayWindow.analysisW = None
         self.window.destroy()
