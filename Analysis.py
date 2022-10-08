@@ -179,7 +179,7 @@ class Analysis():
     def getSummaryText(self):
         summaryString = self._getTranscriptString()+'General:\n'+self._getTimeSummaryString() + \
             self._getAmpSummaryString() + self._getFreqSummaryString() + \
-            self._getPhonemeSummaryString() + "Correct: " + self._getPhonemeSummaryString1()
+            self._getPhonemeSummaryString() + "Correct " + self._getPhonemeSummaryString1()
         return str(summaryString)
 
     def getAnalysisText(self):
@@ -195,8 +195,8 @@ class Analysis():
         PCC, PVC, PPC = self.calcPercentCorrectWrapper()
         PMLU, PWP = self.calcPMLUandPWP()
 
-        analysisString = self._getTranscriptString() + 'Correct Phonemes:\t\t' + \
-            list1 + '\nPhoneme List\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + "{:.2f}".format(PCC) + '\n\tPVC = ' + "{:.2f}".format(
+        analysisString = self._getTranscriptString() + 'Correct Phonemes:\t\t\t' + \
+            list1 + '\nPhoneme List:\t\t\t' + list2 + '\n\n' + 'Speech Accuracy Scoring:' + '\n\tPCC = ' + "{:.2f}".format(PCC) + '\n\tPVC = ' + "{:.2f}".format(
                 PVC) + '\n\tPPC = ' + "{:.2f}".format(PPC) + '\n\tPMLU = ' + "{:.2f}".format(PMLU) + '\n\tPWP = ' + "{:.2f}".format(PWP) + '\n\n'
 
         return str(analysisString)
