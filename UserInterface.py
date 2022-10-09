@@ -457,10 +457,12 @@ class DisplayWindow(UIWindow):
     def saveAs(self):
         super().saveAs()
         path_to_file = filedialog.asksaveasfilename(confirmoverwrite=True, filetypes=(
-            ("Analysis file", "*.DAT"), ("All file types", "*.*")), title="Save File")
+            ("Display Image", "*.png"), ("Analysis file", "*.DAT")), title="Save File")
         if path_to_file.split('.')[-1] == 'DAT':
             saveAndLoad.saveProgram(path_to_file, self.dis)
-        self.savedFilePath = path_to_file
+            self.savedFilePath = path_to_file
+        elif path_to_file.split('.')[-1] == 'png':
+            self.dis.saveDisplay(path_to_file)
 
     def save(self):
         super().save()

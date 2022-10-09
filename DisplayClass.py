@@ -140,6 +140,9 @@ class Display:
         self.transcriptTable.set_visible(False)
         self.fig.canvas.draw_idle()
 
+    def saveDisplay(self, path_to_save):
+        plt.savefig(path_to_save, bbox_inches='tight')
+
     # * display graph1 - signal graph
     def signalGraph(self, time):
         # signal graph
