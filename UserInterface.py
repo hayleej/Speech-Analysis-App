@@ -10,6 +10,7 @@ from matplotlib.backend_bases import key_press_handler
 import saveAndLoad
 import fileIO
 from Analysis import Analysis
+import matplotlib.pyplot as plt
 
 
 class UIWindow:
@@ -22,6 +23,8 @@ class UIWindow:
         self.window.rowconfigure(0, weight=1)
         self.mainframe = ttk.Frame(self.window, padding="2m")
         self.mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+
+        self.window.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
         # self.createMenuBar()
 
@@ -203,7 +206,7 @@ class UIWindow:
                            "style", helpWindow._w, "utility")
         helpWindow.title("Help")
         label = ttk.Label(
-            helpWindow, text="This is the help window. For full documentation on this app refer to README.md at https://github.com/hayleej/Speech-Analysis-App")
+            helpWindow, text="This is the help window. For full documentation on this app refer to README.md at https://github.com/hayleej/Speech-Analysis-App\n\n")
         label.grid(column=0, row=0, sticky=(N, W, E, S))
 
     #! below are temporary definitions for all the menu commands
@@ -226,9 +229,10 @@ class UIWindow:
         pass
 
     def closeFile(self):
-        # ? need to do binding to exit button
-        # ? if only window that exists is closed then close app
-        pass
+        self.closeWindow()
+        if len(rt.winfo_children()) == 0:
+            # if only window that exists is closed then close app
+            rt.destroy()
 
     def zoom(self):
         pass
@@ -267,6 +271,10 @@ class UIWindow:
         path_to_file = filedialog.askopenfilename(filetypes=(
             ("Analysis file", "*.DAT"), ("Sound File", "*.wav")), title="Select File")
         return path_to_file
+
+    def closeWindow(self):
+        # implemented in child classes
+        pass
 
 
 class DisplayWindow(UIWindow):
@@ -366,6 +374,8 @@ class DisplayWindow(UIWindow):
         x = path_to_file.split(".")
         fileType = x[-1]
 
+        self._updateFileName(path_to_file)
+
         if fileType == 'DAT':
             self.dis = saveAndLoad.loadProgram(path_to_file)
             self.dis.graphDisplay()
@@ -397,6 +407,10 @@ class DisplayWindow(UIWindow):
         if len(path_to_file) != 0:
             # a file has been selected
             self._loadPlots(path_to_file)
+
+    def _updateFileName(self, path_to_file):
+        path = path_to_file.split("/")
+        self.fileName = path[-1]
 
     def createMacOSMenuBar(self):
         super().createMacOSMenuBar()
@@ -458,6 +472,7 @@ class DisplayWindow(UIWindow):
     def closeWindow(self):
         if self.analysisW != None:
             self.analysisW.window.destroy()
+        plt.close(self.dis.fig)
         self.window.destroy()
 
 
